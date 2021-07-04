@@ -26,22 +26,23 @@
 
 ## التنزيل
 
-يتم استعمال [GitHub](https://github.com) لتنزيل ملف البوت
+يتم استعمال [GitHub](https://github.com) لتنزيل المشروع البوت
 
 <div dir="ltr">
 
 ```bash
-# clone bot form github
+# نسخ المشروع من جت هب
 git clone https://github.com/Awiteb/randomChat
 
-# cd to bot folder
+# تغير المسار الى مسار المشروع
 cd randomChat
 
-# install required packages
+# تنزيل المكتبات المطلوبة لتشغيل البوت
 pip3 install -r requirements.txt
 ```
-> full the config file
+> config تنويه: يجب ملئ ملف ال 
 ```bash
+# تشغيل البوت
 python3 main.py
 ```
 <div dir="rtl">
