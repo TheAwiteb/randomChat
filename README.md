@@ -42,6 +42,9 @@ pip3 install -r requirements.txt
 ```
 > config تنويه: يجب ملئ ملف ال 
 ```bash
+# انشاء قاعدة البيانات
+python3 make_db.py
+
 # تشغيل البوت
 python3 main.py
 ```
