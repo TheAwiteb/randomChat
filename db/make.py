@@ -11,9 +11,8 @@ def make():
         raise Exception("config يجب عليك وضع التوكن الخاص بالبوت في ملف")
     else:
         # يتم انشاء قاعدة البيانات عبر اللوب التالية
-        for table, columns in tablesName.items():
+        for table in tablesName:
             cursor.execute(f"""CREATE TABLE IF NOT EXISTS '{table}'(
-                            {columns[0]},
-                            {columns[1]}
+                            {','.join(tablesName.get(table))}
                             )""")
             coon.commit()
