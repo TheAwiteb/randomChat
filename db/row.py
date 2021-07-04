@@ -16,7 +16,7 @@ def row(table_name:str, column:str, word:str, want='*'):
         lock.acquire(True)
         cursor.execute(f"SELECT {want} FROM {table_name} WHERE {column}='{word}'")
         result = list(map(
-                    lambda val: str(val),
+                    lambda val: str(val).replace('<br>', '\n'),
                         [val for table in cursor.fetchall() for val in table]
                         ))
         if (len(result) == 0):

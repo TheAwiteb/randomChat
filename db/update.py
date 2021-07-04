@@ -10,6 +10,8 @@ def update(table_name:str, column:str, new_value:str, where_column:str, where_va
         where_column (str): where_value العمود الذي يوجد به.
         where_value (str): where_column القيمة الموجودة في.
     """
+    where_value = where_value.replace('\n', '<br>')
+    new_value = new_value.replace('\n', '<br>')
     try:
         lock.acquire(True)
         cursor.execute(f"UPDATE {table_name} SET '{column}'= '{new_value}' WHERE {where_column} = '{where_value}'")

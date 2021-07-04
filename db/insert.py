@@ -9,7 +9,10 @@ def insert(table_name:str, args:tuple):
     """
     try:
         lock.acquire(True)
-        args = tuple(map(str, args))
+        args = tuple(map(
+                lambda ar:str(ar).replace('\n', '<br>'), 
+                args
+                ))
         first_element = f"('{args[0]}')"
         cursor.execute(f"INSERT INTO {table_name} ({','.join(tablesName[table_name])}) VALUES {tuple(args) if len(args) > 1 else first_element}")
         coon.commit()

@@ -12,7 +12,7 @@ def column(table_name:str, column:str):
         lock.acquire(True)
         cursor.execute(f"SELECT {column} FROM {table_name}")
         return list(map(
-                lambda val: str(val),
+                lambda val: str(val).replace('<br>', '\n'),
                     [val for table in cursor.fetchall() for val in table]
                 ))
     finally:
