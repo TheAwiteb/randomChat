@@ -12,13 +12,13 @@
 
 
 <p align="center">
-  <a href="#installation">التنزيل</a>
+  <a href="#التنزيل">التنزيل</a>
   •
-  <a href="#features">المميزات</a>
+  <a href="#المميزات">المميزات</a>
   •
-  <a href="#usage">الاستعمال</a>
+  <a href="#الاستعمال">الاستعمال</a>
   •
-  <a href="#license">الرخصة</a>
+  <a href="#الرخصة">الرخصة</a>
 </p>
 
 
