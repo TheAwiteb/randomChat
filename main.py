@@ -2,6 +2,7 @@
 سوف يتم كتابة السورس كود الخاص بالبوت هنا
 """
 import time
+from user.sessions_time import sessions_time
 import db
 import markup
 import user
@@ -84,8 +85,16 @@ def message_handler(message):
     chat_id = str(message.chat.id)
     # اذا كان هناك جلسة
     if user.in_sessions(chat_id):
-        # ارسال الرسالة الى شريكه في الجلسة
-        sender.send_to_partner(message, chat_id)
+        # ارسال الرسالة الى شريكه في الجلسة اذ لم تنتهي
+        if time.time() < float(user.sessions_time(chat_id)):
+            sender.send_to_partner(message, chat_id)
+        else:
+            partner_id =  user.partner(chat_id)
+            sessions_id = user.get_sessions(chat_id)
+            user.kill_session(sessions_id)
+            msg = "لقد انتهى وقت الجلسة، للبحث عن جلسة اخرى /search"
+            for u_id in [chat_id, partner_id]:
+                bot.send_message(u_id, msg)
     # اذا لم يكن هناك شريك له، سوف يتم تجاهل الرسالة
     else:
         pass
