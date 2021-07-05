@@ -18,7 +18,7 @@ def make_session(user_id):
         del_waiting(user_id2)
         for user in [user_id, user_id2]:
             db.insert('chat_sessions', (session_id, user, time()+session_time))
-            bot.send_message(user, "تم انشاء جلسة مع %s\n\nلقتل الجلسة ارسل /kill" % username(user_id if user_id != user else user_id2))
+            bot.send_message(user, "تم انشاء جلسة مع %s\n\لقطع الجلسة ارسل /kill" % username(user_id if user_id != user else user_id2))
     # الغاء انشاء جلسة
     else:
         pass
