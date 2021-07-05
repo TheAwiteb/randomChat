@@ -80,7 +80,7 @@ def command_handler(message):
 
 # يلتقط جميع الرسايل ماعدا الاوامر
 @bot.message_handler(func=lambda msg: True, content_types= ["text", "audio", "document", "photo", "sticker",
-                                                            "video", "video_note", "voice"])
+                                                            "video", "video_note", "voice", "animation"])
 def message_handler(message):
     chat_id = str(message.chat.id)
     # اذا كان هناك جلسة

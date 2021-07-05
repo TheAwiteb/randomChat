@@ -35,5 +35,8 @@ def send_message(chat_id, replyType, reply, text, markup=None, msg_id=None):
     elif replyType == "voice":
         bot.send_voice(chat_id=chat_id, voice=reply, caption=text if text != 'None' else "",
                         reply_to_message_id=msg_id, reply_markup=markup, )
+    elif replyType == "animation":
+        bot.send_animation(chat_id=chat_id, animation=reply, caption=text, reply_to_message_id=msg_id,
+                            reply_markup=markup)
     else:
         pass

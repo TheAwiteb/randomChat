@@ -27,6 +27,8 @@ def get_reply(message:Message):
         reply =  message.video_note.file_id
     elif replyType == "voice":
         reply =  message.voice.file_id
+    elif replyType == "animation":
+        reply =  message.animation.file_id
     else:
         return
     return reply, replyType, text
