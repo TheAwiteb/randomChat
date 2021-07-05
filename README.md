@@ -18,6 +18,8 @@
   •
   <a href="#الاستعمال">الاستعمال</a>
   •
+  <a href="#بوت لتجربة السورس">البوت</a>
+  •
   <a href="#الرخصة">الرخصة</a>
 </p>
 
@@ -88,6 +90,10 @@ python3 main.py
       /kill
 
 <div dir="rtl">
+
+## البوت
+
+[@randomChatBBot](https://t.me/randomChatBBot)
 
 ## الرخصة
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
