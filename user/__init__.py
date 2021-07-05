@@ -6,5 +6,6 @@ from .del_waiting import del_waiting
 from .waiting import waiting
 from .make_session import make_session
 from .in_sessions import in_sessions
+from .sessions_time import sessions_time
 from .delete_sessions import delete_sessions
 from .partner import partner
