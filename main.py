@@ -83,19 +83,54 @@ def command_handler(message):
                                                             "video", "video_note", "voice", "animation"])
 def message_handler(message):
     chat_id = str(message.chat.id)
+    msg_id = str(message.id)
     # اذا كان هناك جلسة
     if user.in_sessions(chat_id):
-        # ارسال الرسالة الى شريكه في الجلسة اذ لم تنتهي
+        partner_id =  user.partner(chat_id)
+        # التحقق ان وقت الجلسة لم ينتهي
         if time.time() < float(user.sessions_time(chat_id)):
-            sender.send_to_partner(message, chat_id)
+            if message.text == "مسح":
+                # اخذ ايدي الرسالة المراد مسحها
+                reply_msg_id = str(message.reply_to_message.id) if message.reply_to_message else None
+                # اذا كان قد عمل ربلي لرسالة
+                if reply_msg_id:
+                    # اخذ ايدي الرسلة عند شريك الجلسة لحذفها
+                    partner_msg_id = user.partner_msg_id(chat_id, reply_msg_id)
+                    # اذا كانت الرسالة من المرسل، وفي الجلسة
+                    if bool(list(filter(lambda m_id: m_id == reply_msg_id, 
+                                            db.row("sessions_messages", "user_id", chat_id, "msg_id")))):
+                        for message_be_delete in [(partner_id, partner_msg_id),
+                                                    (chat_id, msg_id),
+                                                        (chat_id, reply_msg_id)]:
+                            c_id, m_id = message_be_delete
+                            bot.delete_message(c_id, m_id)
+                    else:
+                        bot.reply_to(message, "الرسالة ليست موجودة في الجلسة او انها ليست لك")
+                else:
+                    bot.reply_to(message, "يجب عمل ربلي على الرسالة التي تريد مسحها من عند الطرف الثاني")
+            else:
+                sender.send_to_partner(message, chat_id)
         else:
-            partner_id =  user.partner(chat_id)
+            # ايقاف الجلسة اذ انتها وقتها
             sessions_id = user.get_sessions(chat_id)
             user.kill_session(sessions_id)
             msg = "لقد انتهى وقت الجلسة، للبحث عن جلسة اخرى /search"
             for u_id in [chat_id, partner_id]:
-                bot.send_message(u_id, msg)
-    # اذا لم يكن هناك شريك له، سوف يتم تجاهل الرسالة
+                    bot.send_message(u_id, msg)            
+    # اذ لم يكن في جلسة، سوف يتم تجاهل الرسالة
+    else:
+        pass
+
+@bot.edited_message_handler(func=lambda msg:True, content_types= ["text", "document", "photo",
+                                                            "video", "voice", "animation"])
+def edit_message_handler(message):
+    chat_id = str(message.chat.id)
+    msg_id = str(message.id)
+    if user.found(chat_id):
+        if user.in_sessions(chat_id):
+            sender.edit_message(msg_id, chat_id, message)
+        else:
+            pass
     else:
         pass
 
