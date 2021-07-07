@@ -1,5 +1,3 @@
-from user.get_sessions import get_sessions
-import db
 from config import bot
 from .username import username
 from .partner import partner
