@@ -26,11 +26,15 @@ def row(table_name:str, column:str, word:str, want='*', lst=True):
                         lambda t: tuple(str(val) for val in t),
                             [t for t in cursor.fetchall()]
             ))
-        if (len(result) == 0):
-            return None
-        elif (len(result) == 1):
-            return result[0] if lst else result[0][0]
+        if lst:
+            if (len(result) == 0):
+                return None
+            elif (len(result) == 1):
+                return result[0] if lst else result[0][0]
+            else:
+                pass # سوف يتم تنفيد اخخر سطر وارجاع النتائج كلها
         else:
-            return result
+            pass # سوف يتم تنفيد اخخر سطر وارجاع النتائج كلها
+        return result
     finally:
         lock.release()
