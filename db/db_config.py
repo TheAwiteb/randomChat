@@ -10,5 +10,6 @@ tablesName = {
         'users':['id', 'username'],
             'message': ['msg', 'val'],
                 'waiting': ['id'],
-                    "chat_sessions": ["sessions", 'user_id', 'end_time']
+                    "chat_sessions": ["sessions", 'user_id', 'end_time'],
+                        "sessions_messages":["session", "user_id", "msg_id", "msg_id_in_partner"],
             }
