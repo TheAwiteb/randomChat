@@ -89,10 +89,8 @@ def message_handler(message):
         partner_id =  user.partner(chat_id)
         # التحقق ان وقت الجلسة لم ينتهي
         if time.time() < float(user.sessions_time(chat_id)):
+            reply_msg_id = str(message.reply_to_message.id) if message.reply_to_message else None
             if message.text == "مسح":
-                # اخذ ايدي الرسالة المراد مسحها
-                reply_msg_id = str(message.reply_to_message.id) if message.reply_to_message else None
-                # اذا كان قد عمل ربلي لرسالة
                 if reply_msg_id:
                     # اخذ ايدي الرسلة عند شريك الجلسة لحذفها
                     partner_msg_id = user.partner_msg_id(chat_id, reply_msg_id)
@@ -109,7 +107,12 @@ def message_handler(message):
                 else:
                     bot.reply_to(message, "يجب عمل ربلي على الرسالة التي تريد مسحها من عند الطرف الثاني")
             else:
-                sender.send_to_partner(message, chat_id)
+                # اذا تم الرد على رسالة
+                if reply_msg_id:
+                    sender.reply_message(message, chat_id, reply_msg_id)
+                # اذا لم يتم الرد على رسالة
+                else:
+                    sender.send_to_partner(message, chat_id)
         else:
             # ايقاف الجلسة اذ انتها وقتها
             sessions_id = user.get_sessions(chat_id)
