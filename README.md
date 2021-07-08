@@ -12,6 +12,7 @@
 
 
 <p align="center">
+  •
   <a href="#التنزيل">التنزيل</a>
   •
   <a href="#المميزات">المميزات</a>
@@ -21,6 +22,10 @@
   <a href="#البوت">بوت لتجربة السورس</a>
   •
   <a href="#الرخصة">الرخصة</a>
+  <br>
+  <a href="#سياسة_الخصوصية">سياسة الخصوصية</a>
+  •
+  <a href="#الشروط_والاحكام">الشروط والاحكام</a>
 </p>
 
 
@@ -102,3 +107,9 @@ python3 main.py
 
 ## الرخصة
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
+
+## سياسة_الخصوصية
+[تجد نص سياسة الخصوصية هنا](https://github.com/Awiteb/randomChat/blob/master/privacy_policy.txt)
+
+## الشروط_والاحكام
+[تجد نص الشروط والاحكام هنا](https://github.com/Awiteb/randomChat/blob/master/terms_and_conditions.txt)
