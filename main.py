@@ -92,7 +92,6 @@ def command_handler(message):
                                                             "video", "video_note", "voice", "animation"])
 def message_handler(message):
     chat_id = str(message.chat.id)
-    msg_id = str(message.id)
     # اذا كان هناك جلسة
     if user.in_sessions(chat_id):
         partner_id =  user.partner(chat_id)
@@ -100,21 +99,7 @@ def message_handler(message):
         if time.time() < float(user.sessions_time(chat_id)):
             reply_msg_id = str(message.reply_to_message.id) if message.reply_to_message else None
             if message.text == "مسح":
-                if reply_msg_id:
-                    # اخذ ايدي الرسلة عند شريك الجلسة لحذفها
-                    partner_msg_id = user.partner_msg_id(chat_id, reply_msg_id)
-                    # اذا كانت الرسالة من المرسل، وفي الجلسة
-                    if bool(list(filter(lambda m_id: m_id == reply_msg_id, 
-                                            db.row("sessions_messages", "user_id", chat_id, "msg_id")))):
-                        for message_be_delete in [(partner_id, partner_msg_id),
-                                                    (chat_id, msg_id),
-                                                        (chat_id, reply_msg_id)]:
-                            c_id, m_id = message_be_delete
-                            bot.delete_message(c_id, m_id)
-                    else:
-                        bot.reply_to(message, "[رسالة من البوت 🤖]\n\nالرسالة ليست موجودة في الجلسة او انها ليست لك")
-                else:
-                    bot.reply_to(message, "[رسالة من البوت 🤖]\n\nيجب عمل ربلي على الرسالة التي تريد مسحها من عند الطرف الثاني")
+                sender.delete(message, reply_msg_id, partner_id)
             else:
                 # اذا تم الرد على رسالة
                 if reply_msg_id:
