@@ -12,3 +12,4 @@ from .delete_sessions import delete_sessions
 from .kill_session import kill_session
 from .partner import partner
 from .partner_msg_id import partner_msg_id
+from .make_report import make_report
