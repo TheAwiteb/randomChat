@@ -2,7 +2,7 @@
 سوف يتم كتابة السورس كود الخاص بالبوت هنا
 """
 import time
-from user.sessions_time import sessions_time
+from telebot import util
 import db
 import markup
 import user
@@ -13,7 +13,8 @@ from config import (bot, botName)
 # يلتقط الاوامر
 @bot.message_handler(commands=["start", "help", "search", 
                                 "new_name", "my_name", "kill",
-                                    "cancel",])
+                                    "cancel","terms_and_conditions",
+                                        "privacy_policy",])
 def command_handler(message):
     chat_id = str(message.chat.id)
     chat_is_private = message.chat.type == "private"
@@ -21,11 +22,19 @@ def command_handler(message):
     # التحقق هل المحادثة خاصة، ام في محادثة عامة
     if chat_is_private:
         # اذا كان النص من هذول الاثنين
-        if text.startswith(("/start", "/help")):
-            # جلب الرسالة من قاعدة البيانات بعد ازالة ال / للبحث عنه
-            msg = db.row("message", "msg", text[1:], "val")
-            #  ارسال الرسالة الى المستخدم
-            bot.reply_to(message, msg, parse_mode=None if text[1:] == "help" else "markdownv2")
+        if text.startswith(("/start", "/help", "/terms_and_conditions",
+                                        "/privacy_policy")):
+            # ازالة علامة الكوماند
+            command = text[1:]
+            if command in ["terms_and_conditions", "privacy_policy"]:
+                with open(command+'.txt', 'r', encoding="utf-8") as f:
+                    for text in util.split_string(f.read(), 3000):
+                        bot.reply_to(message, text)
+            else:
+                # جلب الرسالة من قاعدة البيانات بعد ازالة ال / للبحث عنه
+                msg = db.row("message", "msg", command, "val")
+                #  ارسال الرسالة الى المستخدم
+                bot.reply_to(message, msg, parse_mode=None if command == "help" else "markdownv2")
         elif text.startswith("/search"):
             # اذا كان المستخدم موجود في قاعدة البيانات
             if user.found(chat_id):
