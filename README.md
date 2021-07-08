@@ -101,6 +101,12 @@ python3 main.py
 
 <div dir="rtl">
 
+* <b>مسح رسالتك (يجب عمل ربلي على الرسالة المرا مسحها)</b>
+
+      مسح
+
+<div dir="rtl">
+
 ## البوت
 
 [@randomChatBBot](https://t.me/randomChatBBot)
