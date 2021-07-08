@@ -7,18 +7,21 @@ import db
 import markup
 import user
 import sender
-from config import (bot, botName)
+from config import (bot, botName, delay, max_reports)
 
 
 # يلتقط الاوامر
 @bot.message_handler(commands=["start", "help", "search", 
                                 "new_name", "my_name", "kill",
                                     "cancel","terms_and_conditions",
-                                        "privacy_policy",])
+                                        "privacy_policy","report"])
 def command_handler(message):
     chat_id = str(message.chat.id)
     chat_is_private = message.chat.type == "private"
     text = message.text
+    partner_id =  user.partner(chat_id)
+    in_session = user.in_sessions(chat_id)
+    username = user.username(chat_id)
     # التحقق هل المحادثة خاصة، ام في محادثة عامة
     if chat_is_private:
         # اذا كان النص من هذول الاثنين
@@ -38,7 +41,7 @@ def command_handler(message):
         elif text.startswith("/search"):
             # اذا كان المستخدم موجود في قاعدة البيانات
             if user.found(chat_id):
-                if not user.in_sessions(chat_id):
+                if not in_session:
                     if not user.waiting(chat_id):
                         if len(db.column('waiting', 'id')) != 0:
                             user.make_session(chat_id)
@@ -58,7 +61,6 @@ def command_handler(message):
         elif text.startswith("/new_name"):
             user.add_user(chat_id, not chat_id in db.column('users', 'id'))
         elif text.startswith("/my_name"):
-            username = user.username(chat_id)
             if username:
                 msg = "[رسالة من البوت 🤖]\n\nاسمك الحالي هو: %s\n\nتنويه:\nهذا الاسم سوف يتم عرضه لاي شخص تحادثه عبر البوت" % username
             else:
@@ -71,7 +73,7 @@ def command_handler(message):
             else:
                 bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت لست بجلسة للبحث عن جلسة ارسل /search")
         elif text.startswith("/kill"):
-            if user.in_sessions(chat_id):
+            if in_session:
                 sessions_id = db.row('chat_sessions', 'user_id', chat_id, 'sessions')
                 user.delete_sessions(sessions_id, chat_id)
                 msg = "[رسالة من البوت 🤖]\n\nلقد تم قطع الجلسة بنجاح\nللبحث عن جلسة اخرى /search"
@@ -79,6 +81,11 @@ def command_handler(message):
             else:
                 msg = "[رسالة من البوت 🤖]\n\nانت لست في جلسة حقا"
                 bot.reply_to(message, msg)
+        elif text.startswith("/report"):
+            if in_session:
+                user.make_report(message, chat_id, username, partner_id)
+            else:
+                bot.reply_to(message, "انت لست في جلسة\nيمكنك الابلاغ على شريكك في الجلسة عندما تكون في جلسة")
         else:
             pass
     else:
@@ -92,31 +99,43 @@ def command_handler(message):
                                                             "video", "video_note", "voice", "animation"])
 def message_handler(message):
     chat_id = str(message.chat.id)
-    # اذا كان هناك جلسة
-    if user.in_sessions(chat_id):
-        partner_id =  user.partner(chat_id)
-        # التحقق ان وقت الجلسة لم ينتهي
-        if time.time() < float(user.sessions_time(chat_id)):
-            reply_msg_id = str(message.reply_to_message.id) if message.reply_to_message else None
-            if message.text == "مسح":
-                sender.delete(message, reply_msg_id, partner_id)
-            else:
-                # اذا تم الرد على رسالة
-                if reply_msg_id:
-                    sender.reply_message(message, chat_id, reply_msg_id)
-                # اذا لم يتم الرد على رسالة
+    user_reports = int(db.row('users', "id", chat_id, "reports"))
+    if user_reports < max_reports:
+        # اذا كان هناك جلسة
+        if user.in_sessions(chat_id):
+            partner_id =  user.partner(chat_id)
+            time_now = time.time()
+            # التحقق ان وقت الجلسة لم ينتهي
+            if time_now < float(user.sessions_time(chat_id)):
+                reply_msg_id = str(message.reply_to_message.id) if message.reply_to_message else None
+                if message.text == "مسح":
+                    sender.delete(message, reply_msg_id, partner_id)
                 else:
-                    sender.send_to_partner(message, chat_id)
+                    user_last_msg_time = float(db.row('users', "id", chat_id, "last_msg"))
+                    # التحقق من وقت اخر رسالة
+                    if time_now >= (user_last_msg_time+delay):
+                        # تحديث وقت اخر رسالة
+                        db.update("users", "last_msg", time_now, "id", chat_id)
+                        # اذا تم الرد على رسالة
+                        if reply_msg_id:
+                            sender.reply_message(message, chat_id, reply_msg_id)
+                        # اذا لم يتم الرد على رسالة
+                        else:
+                            sender.send_to_partner(message, chat_id)
+                    else:
+                        bot.reply_to(message, "[رسالة من البوت 🤖]\n\nلم يتم ارسال الرسالة بنجاح، بسبب عدم التزام بالوقت الذي بين كل رسالة واخرى وهو %s ثانية" % delay)
+            else:
+                # ايقاف الجلسة اذ انتها وقتها
+                sessions_id = user.get_sessions(chat_id)
+                user.kill_session(sessions_id)
+                msg = "[رسالة من البوت 🤖]\n\nلقد انتهى وقت الجلسة، للبحث عن جلسة اخرى /search"
+                for u_id in [chat_id, partner_id]:
+                        bot.send_message(u_id, msg)         
+        # اذ لم يكن في جلسة، سوف يتم تجاهل الرسالة
         else:
-            # ايقاف الجلسة اذ انتها وقتها
-            sessions_id = user.get_sessions(chat_id)
-            user.kill_session(sessions_id)
-            msg = "[رسالة من البوت 🤖]\n\nلقد انتهى وقت الجلسة، للبحث عن جلسة اخرى /search"
-            for u_id in [chat_id, partner_id]:
-                    bot.send_message(u_id, msg)            
-    # اذ لم يكن في جلسة، سوف يتم تجاهل الرسالة
+            pass
     else:
-        pass
+        bot.reply_to(message, "لقد ,وصلت الي حد البلاغات وهو %s، عدد البلاغات التي لديك %s\n\nيحافظ حد البلاغات على استقرار البوت" % (max_reports, user_reports))
 
 @bot.edited_message_handler(func=lambda msg:True, content_types= ["text", "document", "photo",
                                                             "video", "voice", "animation"])
