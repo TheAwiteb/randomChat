@@ -34,7 +34,7 @@ def command_handler(message):
                 # جلب الرسالة من قاعدة البيانات بعد ازالة ال / للبحث عنه
                 msg = db.row("message", "msg", command, "val")
                 #  ارسال الرسالة الى المستخدم
-                bot.reply_to(message, msg, parse_mode=None if command == "help" else "markdownv2")
+                bot.reply_to(message, msg)
         elif text.startswith("/search"):
             # اذا كان المستخدم موجود في قاعدة البيانات
             if user.found(chat_id):
@@ -44,12 +44,12 @@ def command_handler(message):
                             user.make_session(chat_id)
                         else:
                             user.add_to_waiting(chat_id)
-                            msg = "لقد تم اضافتك الى قائمة الانتظار، عندما يتم ايجاد شخص سوف يتم ارسال رسالة لك\nللالغاء ارسل /cancel"
+                            msg = "[رسالة من البوت 🤖]\n\nلقد تم اضافتك الى قائمة الانتظار، عندما يتم ايجاد شخص سوف يتم ارسال رسالة لك\nللالغاء ارسل /cancel"
                             bot.reply_to(message, msg)
                     else:
-                        bot.reply_to(message, "انت في قائمة الانتظار حقا\nللالغاء ارسل /cancel")
+                        bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت في قائمة الانتظار حقا\nللالغاء ارسل /cancel")
                 else:
-                    bot.reply_to(message, "انت في جلسة حقا")
+                    bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت في جلسة حقا")
             else:
                 # جلب الرسالة من قاعدة البيانات
                 msg = db.row("message", "msg", "no_user", "val")
@@ -60,24 +60,24 @@ def command_handler(message):
         elif text.startswith("/my_name"):
             username = user.username(chat_id)
             if username:
-                msg = "اسمك الحالي هو: %s\n\nتنويه:\nهذا الاسم سوف يتم عرضه لاي شخص تحادثه عبر البوت" % username
+                msg = "[رسالة من البوت 🤖]\n\nاسمك الحالي هو: %s\n\nتنويه:\nهذا الاسم سوف يتم عرضه لاي شخص تحادثه عبر البوت" % username
             else:
-                msg = "لم يتم انشاء اسم لك بعد.\nلانشاء اسم ارسل /new_name"
+                msg = "[رسالة من البوت 🤖]\n\nلم يتم انشاء اسم لك بعد.\nلانشاء اسم ارسل /new_name"
             bot.reply_to(message, msg)
         elif text.startswith("/cancel"):
             if user.waiting(chat_id):
                 user.del_waiting(chat_id)
-                bot.reply_to(message, "لقد تم الغاء البحث عن جلسة بنجاح")
+                bot.reply_to(message, "[رسالة من البوت 🤖]\n\nلقد تم الغاء البحث عن جلسة بنجاح")
             else:
-                bot.reply_to(message, "انت لست بجلسة للبحث عن جلسة ارسل /search")
+                bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت لست بجلسة للبحث عن جلسة ارسل /search")
         elif text.startswith("/kill"):
             if user.in_sessions(chat_id):
                 sessions_id = db.row('chat_sessions', 'user_id', chat_id, 'sessions')
                 user.delete_sessions(sessions_id, chat_id)
-                msg = "لقد تم قطع الجلسة بنجاح\nللبحث عن جلسة اخرى /search"
+                msg = "[رسالة من البوت 🤖]\n\nلقد تم قطع الجلسة بنجاح\nللبحث عن جلسة اخرى /search"
                 bot.reply_to(message, msg)
             else:
-                msg = "انت لست في جلسة حقا"
+                msg = "[رسالة من البوت 🤖]\n\nانت لست في جلسة حقا"
                 bot.reply_to(message, msg)
         else:
             pass
@@ -112,9 +112,9 @@ def message_handler(message):
                             c_id, m_id = message_be_delete
                             bot.delete_message(c_id, m_id)
                     else:
-                        bot.reply_to(message, "الرسالة ليست موجودة في الجلسة او انها ليست لك")
+                        bot.reply_to(message, "[رسالة من البوت 🤖]\n\nالرسالة ليست موجودة في الجلسة او انها ليست لك")
                 else:
-                    bot.reply_to(message, "يجب عمل ربلي على الرسالة التي تريد مسحها من عند الطرف الثاني")
+                    bot.reply_to(message, "[رسالة من البوت 🤖]\n\nيجب عمل ربلي على الرسالة التي تريد مسحها من عند الطرف الثاني")
             else:
                 # اذا تم الرد على رسالة
                 if reply_msg_id:
@@ -126,7 +126,7 @@ def message_handler(message):
             # ايقاف الجلسة اذ انتها وقتها
             sessions_id = user.get_sessions(chat_id)
             user.kill_session(sessions_id)
-            msg = "لقد انتهى وقت الجلسة، للبحث عن جلسة اخرى /search"
+            msg = "[رسالة من البوت 🤖]\n\nلقد انتهى وقت الجلسة، للبحث عن جلسة اخرى /search"
             for u_id in [chat_id, partner_id]:
                     bot.send_message(u_id, msg)            
     # اذ لم يكن في جلسة، سوف يتم تجاهل الرسالة
@@ -158,7 +158,7 @@ def query_handler(call):
             bot.delete_message(user_id, call.message.id)
         else:
             # اخباره بأمر تحديث الاسم لان الزر فق للمستخدم الجديد
-            bot.send_message(user_id, "لتحديث الاسم المستعار ارسل /new_name")
+            bot.send_message(user_id, "[رسالة من البوت 🤖]\n\nلتحديث الاسم المستعار ارسل /new_name")
     else:
         bot.answer_callback_query(call.id, "المرسل %s" % callback)
 
