@@ -7,7 +7,7 @@ lock = threading.Lock()
 
 # يتم وضع اسماء الجداول مع الاعمدة الخاصة بها في هذا القاموس
 tablesName = {
-        'users':['id', 'username'],
+        'users':['id', 'username', "last_msg", "reports", "users_reports"],
             'message': ['msg', 'val'],
                 'waiting': ['id'],
                     "chat_sessions": ["sessions", 'user_id', 'end_time'],
