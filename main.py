@@ -7,7 +7,7 @@ import db
 import markup
 import user
 import sender
-from config import (bot, botName, delay, max_reports)
+from config import (bot, botName, delay)
 
 
 # يلتقط الاوامر
@@ -24,68 +24,72 @@ def command_handler(message):
     username = user.username(chat_id)
     # التحقق هل المحادثة خاصة، ام في محادثة عامة
     if chat_is_private:
-        # اذا كان النص من هذول الاثنين
-        if text.startswith(("/start", "/help", "/terms_and_conditions",
-                                        "/privacy_policy")):
-            # ازالة علامة الكوماند
-            command = text[1:]
-            if command in ["terms_and_conditions", "privacy_policy"]:
-                with open(command+'.txt', 'r', encoding="utf-8") as f:
-                    for text in util.split_string(f.read(), 3000):
-                        bot.reply_to(message, text)
-            else:
-                # جلب الرسالة من قاعدة البيانات بعد ازالة ال / للبحث عنه
-                msg = db.row("message", "msg", command, "val")
-                #  ارسال الرسالة الى المستخدم
-                bot.reply_to(message, msg)
-        elif text.startswith("/search"):
-            # اذا كان المستخدم موجود في قاعدة البيانات
-            if user.found(chat_id):
-                if not in_session:
-                    if not user.waiting(chat_id):
-                        if len(db.column('waiting', 'id')) != 0:
-                            user.make_session(chat_id)
-                        else:
-                            user.add_to_waiting(chat_id)
-                            msg = "[رسالة من البوت 🤖]\n\nلقد تم اضافتك الى قائمة الانتظار، عندما يتم ايجاد شخص سوف يتم ارسال رسالة لك\nللالغاء ارسل /cancel"
-                            bot.reply_to(message, msg)
-                    else:
-                        bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت في قائمة الانتظار حقا\nللالغاء ارسل /cancel")
+        if user.check_reports(message, chat_id):
+            # اذا كان النص من هذول الاثنين
+            if text.startswith(("/start", "/help", "/terms_and_conditions",
+                                            "/privacy_policy")):
+                # ازالة علامة الكوماند
+                command = text[1:]
+                if command in ["terms_and_conditions", "privacy_policy"]:
+                    with open(command+'.txt', 'r', encoding="utf-8") as f:
+                        for text in util.split_string(f.read(), 3000):
+                            bot.reply_to(message, text)
                 else:
-                    bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت في جلسة حقا")
-            else:
-                # جلب الرسالة من قاعدة البيانات
-                msg = db.row("message", "msg", "no_user", "val")
-                #  ارسال الرسالة الى المستخدم
-                bot.reply_to(message, msg, reply_markup=markup.make_username())
-        elif text.startswith("/new_name"):
-            user.add_user(chat_id, not chat_id in db.column('users', 'id'))
-        elif text.startswith("/my_name"):
-            if username:
-                msg = "[رسالة من البوت 🤖]\n\nاسمك الحالي هو: %s\n\nتنويه:\nهذا الاسم سوف يتم عرضه لاي شخص تحادثه عبر البوت" % username
-            else:
-                msg = "[رسالة من البوت 🤖]\n\nلم يتم انشاء اسم لك بعد.\nلانشاء اسم ارسل /new_name"
-            bot.reply_to(message, msg)
-        elif text.startswith("/cancel"):
-            if user.waiting(chat_id):
-                user.del_waiting(chat_id)
-                bot.reply_to(message, "[رسالة من البوت 🤖]\n\nلقد تم الغاء البحث عن جلسة بنجاح")
-            else:
-                bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت لست بجلسة للبحث عن جلسة ارسل /search")
-        elif text.startswith("/kill"):
-            if in_session:
-                sessions_id = db.row('chat_sessions', 'user_id', chat_id, 'sessions')
-                user.delete_sessions(sessions_id, chat_id)
-                msg = "[رسالة من البوت 🤖]\n\nلقد تم قطع الجلسة بنجاح\nللبحث عن جلسة اخرى /search"
+                    # جلب الرسالة من قاعدة البيانات بعد ازالة ال / للبحث عنه
+                    msg = db.row("message", "msg", command, "val")
+                    #  ارسال الرسالة الى المستخدم
+                    bot.reply_to(message, msg)
+            elif text.startswith("/search"):
+                # اذا كان المستخدم موجود في قاعدة البيانات
+                if user.found(chat_id):
+                    if not in_session:
+                        if not user.waiting(chat_id):
+                            if len(db.column('waiting', 'id')) != 0:
+                                user.make_session(chat_id)
+                            else:
+                                user.add_to_waiting(chat_id)
+                                msg = "[رسالة من البوت 🤖]\n\nلقد تم اضافتك الى قائمة الانتظار، عندما يتم ايجاد شخص سوف يتم ارسال رسالة لك\nللالغاء ارسل /cancel"
+                                bot.reply_to(message, msg)
+                        else:
+                            bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت في قائمة الانتظار حقا\nللالغاء ارسل /cancel")
+                    else:
+                        bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت في جلسة حقا")
+                else:
+                    # جلب الرسالة من قاعدة البيانات
+                    msg = db.row("message", "msg", "no_user", "val")
+                    #  ارسال الرسالة الى المستخدم
+                    bot.reply_to(message, msg, reply_markup=markup.make_username())
+            elif text.startswith("/new_name"):
+                user.add_user(chat_id, not chat_id in db.column('users', 'id'))
+            elif text.startswith("/my_name"):
+                if username:
+                    msg = "[رسالة من البوت 🤖]\n\nاسمك الحالي هو: %s\n\nتنويه:\nهذا الاسم سوف يتم عرضه لاي شخص تحادثه عبر البوت" % username
+                else:
+                    msg = "[رسالة من البوت 🤖]\n\nلم يتم انشاء اسم لك بعد.\nلانشاء اسم ارسل /new_name"
                 bot.reply_to(message, msg)
+            elif text.startswith("/cancel"):
+                if user.waiting(chat_id):
+                    user.del_waiting(chat_id)
+                    bot.reply_to(message, "[رسالة من البوت 🤖]\n\nلقد تم الغاء البحث عن جلسة بنجاح")
+                else:
+                    bot.reply_to(message, "[رسالة من البوت 🤖]\n\nانت لست بجلسة للبحث عن جلسة ارسل /search")
+            elif text.startswith("/kill"):
+                if in_session:
+                    sessions_id = db.row('chat_sessions', 'user_id', chat_id, 'sessions')
+                    user.delete_sessions(sessions_id, chat_id)
+                    msg = "[رسالة من البوت 🤖]\n\nلقد تم قطع الجلسة بنجاح\nللبحث عن جلسة اخرى /search"
+                    bot.reply_to(message, msg)
+                else:
+                    msg = "[رسالة من البوت 🤖]\n\nانت لست في جلسة حقا"
+                    bot.reply_to(message, msg)
+            elif text.startswith("/report"):
+                if in_session:
+                    user.make_report(message, chat_id, username, partner_id)
+                else:
+                    bot.reply_to(message, "انت لست في جلسة\nيمكنك الابلاغ على شريكك في الجلسة عندما تكون في جلسة")
             else:
-                msg = "[رسالة من البوت 🤖]\n\nانت لست في جلسة حقا"
-                bot.reply_to(message, msg)
-        elif text.startswith("/report"):
-            if in_session:
-                user.make_report(message, chat_id, username, partner_id)
-            else:
-                bot.reply_to(message, "انت لست في جلسة\nيمكنك الابلاغ على شريكك في الجلسة عندما تكون في جلسة")
+                pass
+        # اذ كان محظور سوف يتم ارسال له رسالة من داخل الدالة
         else:
             pass
     else:
@@ -99,8 +103,8 @@ def command_handler(message):
                                                             "video", "video_note", "voice", "animation"])
 def message_handler(message):
     chat_id = str(message.chat.id)
-    user_reports = int(db.row('users', "id", chat_id, "reports"))
-    if user_reports < max_reports:
+    # التحقق من ان الشخص ليس محظور
+    if user.check_reports(message, chat_id):
         # اذا كان هناك جلسة
         if user.in_sessions(chat_id):
             partner_id =  user.partner(chat_id)
@@ -134,8 +138,9 @@ def message_handler(message):
         # اذ لم يكن في جلسة، سوف يتم تجاهل الرسالة
         else:
             pass
+    # اذ كان محظور سوف يتم ارسال له رسالة من داخل الدالة
     else:
-        bot.reply_to(message, "لقد ,وصلت الي حد البلاغات وهو %s، عدد البلاغات التي لديك %s\n\nيحافظ حد البلاغات على استقرار البوت" % (max_reports, user_reports))
+        pass
 
 @bot.edited_message_handler(func=lambda msg:True, content_types= ["text", "document", "photo",
                                                             "video", "voice", "animation"])
