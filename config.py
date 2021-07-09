@@ -3,7 +3,7 @@
 https://t.me/BotFather يمكنك جلب التوكن الخاص بالبوت عبر هذا البوت
 """
 
-VERSION = "v2.1.0"
+VERSION = "v2.2.0"
 
 # ضع توكن البوت هنا
 TOKEN = str("")
