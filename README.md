@@ -109,7 +109,7 @@ python3 main.py
 
 ## البوت
 
-[@randomChatBBot](https://t.me/randomChatBBot)
+[@Z11Bot](https://t.me/Z11Bot)
 
 ## الرخصة
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
